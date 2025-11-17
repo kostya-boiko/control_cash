@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "582007164570",
+    "project_id": "control-cash-db548",
+    "storage_bucket": "control-cash-db548.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582007164570:android:79c47afe6146c37becd923",
+        "android_client_info": {
+          "package_name": "com.example.control_cash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWaxxyQwivAi4XVmXrlzYK0WsI0F3NL78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

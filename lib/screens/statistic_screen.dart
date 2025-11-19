@@ -1,15 +1,15 @@
-import 'package:control_cash/screens/statistic_screen.dart';
+import 'package:control_cash/main.dart';
 import 'package:control_cash/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class StoryScreen extends StatefulWidget {
-  const StoryScreen({super.key});
+class StatisticScreen extends StatefulWidget {
+  const StatisticScreen({super.key});
 
   @override
-  State<StoryScreen> createState() => _StoryScreenState();
+  State<StatisticScreen> createState() => _StatisticScreenState();
 }
 
-class _StoryScreenState extends State<StoryScreen> {
+class _StatisticScreenState extends State<StatisticScreen> {
   String userEmail = 'noname';
   final authService = AuthService();
 
@@ -36,14 +36,16 @@ class _StoryScreenState extends State<StoryScreen> {
         child: Column(
           children: [
             Text(userEmail),
-            ElevatedButton(onPressed: () => authService.signOut(), child: Text('Logout')),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/statistic'),
-              child: const Text(
-                'Statistic',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
+            Text('Statistic'),
+            ElevatedButton(onPressed: () {
+              authService.signOut();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyApp(),
+                ),
+              );
+            }, child: Text('Logout')),
           ],
         ),
       ),

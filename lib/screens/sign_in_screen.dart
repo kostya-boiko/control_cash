@@ -40,11 +40,6 @@ class _SignInScreenState extends State<SignInScreen> {
         isLoading = false;
       });
     }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const StoryScreen()),
-    );
   }
 
   @override

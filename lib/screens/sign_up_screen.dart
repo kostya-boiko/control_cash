@@ -25,11 +25,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } finally {
       setState(() => isLoading = false);
     }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const StoryScreen()),
-    );
   }
 
   @override

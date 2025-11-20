@@ -1,7 +1,9 @@
-import 'package:control_cash/screens/story_screen.dart';
+import 'package:control_cash/main.dart';
 import 'package:control_cash/services/auth_service.dart';
+import 'package:control_cash/utils/email_validator.dart';
+import 'package:control_cash/utils/password_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import '../widgets/standard_button.dart';
 import '../widgets/standard_input.dart';
 import 'reset_screen.dart';
@@ -17,7 +19,13 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
   bool isLoading = false;
+
+  String? emailError;
+  String? passwordError;
+  String? globalError;
+
   final authService = AuthService();
 
   @override
@@ -28,13 +36,47 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> signIn() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    setState(() {
+      emailError = null;
+      passwordError = null;
+      globalError = null;
+    });
+
+    bool hasError = false;
+
+    if (!validateEmail(email)) {
+      emailError = "Please enter a valid email";
+      hasError = true;
+    }
+
+    if (!validatePassword(password)) {
+      passwordError = "Minimum 6 characters";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setState(() {});
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
+
     try {
-      await authService.signIn(emailController.text, passwordController.text);
+      await authService.signIn(email, password);
+      Navigator.push(context, MaterialPageRoute(builder: (_) => MyApp()));
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        globalError = "Authentication error: ${e.message}";
+      });
     } catch (e) {
-      print(e);
+      setState(() {
+        globalError = "Unexpected error: $e";
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -46,7 +88,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -54,19 +96,51 @@ class _SignInScreenState extends State<SignInScreen> {
               'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Google-flutter-logo.svg/1024px-Google-flutter-logo.svg.png',
               width: 300,
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
+
+            if (globalError != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.red),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        globalError!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             StandardInput(
               isObscureText: false,
               labelText: 'Email',
               controller: emailController,
+              errorText: emailError,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
+
             StandardInput(
               isObscureText: true,
               labelText: 'Password',
               controller: passwordController,
+              errorText: passwordError,
             ),
-            SizedBox(height: 20),
+
+            const SizedBox(height: 20),
+
             Row(
               children: [
                 Expanded(
@@ -79,7 +153,9 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+
+            const SizedBox(height: 10),
+
             Row(
               children: [
                 Expanded(
@@ -95,6 +171,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ],
             ),
+
             TextButton(
               onPressed: () => Navigator.push(
                 context,

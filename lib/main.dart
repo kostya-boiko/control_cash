@@ -1,8 +1,9 @@
+import 'package:control_cash/screens/home_layaut.dart';
 import 'package:control_cash/screens/reset_screen.dart';
 import 'package:control_cash/screens/sign_in_screen.dart';
 import 'package:control_cash/screens/sign_up_screen.dart';
 import 'package:control_cash/screens/statistic_screen.dart';
-import 'package:control_cash/screens/story_screen.dart';
+import 'package:control_cash/screens/transactions_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       routes: {
-        '/story': (_) => const StoryScreen(),
+        '/transactions': (_) => TransactionsScreen(),
         '/statistic': (_) => const StatisticScreen(),
         '/signin': (_) => const SignInScreen(),
         '/signup': (_) => const SignUpScreen(),
@@ -52,9 +53,10 @@ class AuthGate extends StatelessWidget {
         }
 
         if (!snapshot.hasData) {
-          return SignInScreen();
+          return const SignInScreen();
         }
-        return StoryScreen();
+
+        return const HomeLayout();
       },
     );
   }

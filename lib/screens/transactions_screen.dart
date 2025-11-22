@@ -1,19 +1,7 @@
+import 'package:control_cash/data/transactions.dart';
+import 'package:control_cash/utils/date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-class Transaction {
-  final String title;
-  final double amount;
-  final DateTime date;
-  final bool isIncome;
-
-  Transaction({
-    required this.title,
-    required this.amount,
-    required this.date,
-    required this.isIncome,
-  });
-}
 
 class TransactionsScreen extends StatefulWidget {
   @override
@@ -33,14 +21,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void initState() {
     super.initState();
 
-    allTransactions = List.generate(200, (i) {
-      return Transaction(
-        title: "Transaction $i",
-        amount: (i % 2 == 0 ? 100 : 50),
-        date: DateTime.now().subtract(Duration(days: i)),
-        isIncome: i % 2 == 0,
-      );
-    });
+    allTransactions = transactions;
   }
 
   // ░░░░░░░░░░░░░░░░░░░░░  FILTER + SORT + PAGINATION  ░░░░░░░░░░░░░░░░░░░░░
@@ -48,11 +29,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     List<Transaction> base = selectedRange == null
         ? allTransactions
         : allTransactions.where((t) {
-      return t.date.isAfter(
-          selectedRange!.start.subtract(const Duration(days: 1))) &&
-          t.date.isBefore(
-              selectedRange!.end.add(const Duration(days: 1)));
-    }).toList();
+            return t.date.isAfter(
+                  selectedRange!.start.subtract(const Duration(days: 1)),
+                ) &&
+                t.date.isBefore(
+                  selectedRange!.end.add(const Duration(days: 1)),
+                );
+          }).toList();
 
     // SORT
     base.sort((a, b) {
@@ -87,24 +70,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     setState(() {
       currentLoaded += pageSize;
     });
-  }
-
-  // ░░░░░░░░░░░░░░░░░░░░░  PERIOD PICKING  ░░░░░░░░░░░░░░░░░░░░░
-  Future<void> pickCustomRange() async {
-    final now = DateTime.now();
-
-    DateTimeRange? result = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 5),
-      lastDate: DateTime(now.year + 1),
-    );
-
-    if (result != null) {
-      setState(() {
-        selectedRange = result;
-        currentLoaded = pageSize;
-      });
-    }
   }
 
   void selectPeriod(String period) {
@@ -149,7 +114,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         break;
 
       case "custom":
-        pickCustomRange();
+        pickCustomRange(context, (result) {
+          setState(() {
+            selectedRange = result;
+            currentLoaded = pageSize;
+          });
+        });
         break;
     }
   }
@@ -167,122 +137,125 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     final grouped = groupByDate(filteredTransactions);
 
-    return Scaffold(
-      body: Column(
-        children: [
-          // ░░░░░░░░░░░░ PERIOD BLOCK  ░░░░░░░░░░░░
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    getPeriodLabel(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Column(
+      children: [
+        // ░░░░░░░░░░░░ PERIOD BLOCK  ░░░░░░░░░░░░
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  getPeriodLabel(),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              // Calendar dropdown button
+              PopupMenuButton<String>(
+                icon: Icon(Icons.calendar_month),
+                onSelected: selectPeriod,
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: "all", child: Text("All time")),
+                  PopupMenuItem(value: "today", child: Text("Today")),
+                  PopupMenuItem(value: "week", child: Text("Last 7 days")),
+                  PopupMenuItem(value: "month", child: Text("This month")),
+                  PopupMenuItem(value: "custom", child: Text("Custom range")),
+                ],
+              ),
+
+              // Sort button
+              PopupMenuButton<String>(
+                icon: Icon(Icons.sort),
+                onSelected: (value) {
+                  setState(() => sortMode = value);
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: "date_desc",
+                    child: Text("Newest first"),
                   ),
-                ),
-
-                // Calendar dropdown button
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.calendar_month),
-                  onSelected: selectPeriod,
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: "all", child: Text("All time")),
-                    PopupMenuItem(value: "today", child: Text("Today")),
-                    PopupMenuItem(value: "week", child: Text("Last 7 days")),
-                    PopupMenuItem(value: "month", child: Text("This month")),
-                    PopupMenuItem(value: "custom", child: Text("Custom range")),
-                  ],
-                ),
-
-                // Sort button
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.sort),
-                  onSelected: (value) {
-                    setState(() => sortMode = value);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: "date_desc", child: Text("Newest first")),
-                    PopupMenuItem(value: "date_asc", child: Text("Oldest first")),
-                    PopupMenuItem(value: "amount_desc", child: Text("Amount ↓")),
-                    PopupMenuItem(value: "amount_asc", child: Text("Amount ↑")),
-                  ],
-                ),
-              ],
-            ),
+                  PopupMenuItem(value: "date_asc", child: Text("Oldest first")),
+                  PopupMenuItem(value: "amount_desc", child: Text("Amount ↓")),
+                  PopupMenuItem(value: "amount_asc", child: Text("Amount ↑")),
+                ],
+              ),
+            ],
           ),
+        ),
 
-          // ░░░░░░░░░░░░ LIST  ░░░░░░░░░░░░
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scroll) {
-                if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
-                  loadMore();
+        // ░░░░░░░░░░░░ LIST  ░░░░░░░░░░░░
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scroll) {
+              if (scroll.metrics.pixels >=
+                  scroll.metrics.maxScrollExtent - 200) {
+                loadMore();
+              }
+              return false;
+            },
+            child: ListView(
+              children: grouped.entries.map((group) {
+                DateTime d = DateTime.parse(group.key);
+                String title;
+
+                DateTime now = DateTime.now();
+                DateTime yesterday = now.subtract(Duration(days: 1));
+
+                if (DateFormat('yyyy-MM-dd').format(d) ==
+                    DateFormat('yyyy-MM-dd').format(now)) {
+                  title = "Today";
+                } else if (DateFormat('yyyy-MM-dd').format(d) ==
+                    DateFormat('yyyy-MM-dd').format(yesterday)) {
+                  title = "Yesterday";
+                } else {
+                  title = DateFormat('dd MMM yyyy').format(d);
                 }
-                return false;
-              },
-              child: ListView(
-                children: grouped.entries.map((group) {
-                  DateTime d = DateTime.parse(group.key);
-                  String title;
 
-                  DateTime now = DateTime.now();
-                  DateTime yesterday = now.subtract(Duration(days: 1));
-
-                  if (DateFormat('yyyy-MM-dd').format(d) ==
-                      DateFormat('yyyy-MM-dd').format(now)) {
-                    title = "Today";
-                  } else if (DateFormat('yyyy-MM-dd').format(d) ==
-                      DateFormat('yyyy-MM-dd').format(yesterday)) {
-                    title = "Yesterday";
-                  } else {
-                    title = DateFormat('dd MMM yyyy').format(d);
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade700,
-                          ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade700,
                         ),
                       ),
+                    ),
 
-                      ...group.value.map((t) {
-                        return ListTile(
-                          leading: Icon(
-                            t.isIncome ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: t.isIncome ? Colors.green : Colors.red,
+                    ...group.value.map((t) {
+                      return ListTile(
+                        leading: Icon(
+                          t.amount > 0
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          color: t.amount > 0 ? Colors.green : Colors.red,
+                        ),
+                        title: Text(t.title),
+                        subtitle: Text(DateFormat('HH:mm').format(t.date)),
+                        trailing: Text(
+                          "${t.amount > 0 ? "+" : "-"}${t.amount} \$",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: t.amount > 0 ? Colors.green : Colors.red,
                           ),
-                          title: Text(t.title),
-                          subtitle: Text(DateFormat('HH:mm').format(t.date)),
-                          trailing: Text(
-                            "${t.isIncome ? "+" : "-"}${t.amount} \$",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: t.isIncome ? Colors.green : Colors.red,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  );
-                }).toList(),
-              ),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                );
+              }).toList(),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

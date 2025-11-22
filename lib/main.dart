@@ -2,7 +2,7 @@ import 'package:control_cash/screens/home_layaut.dart';
 import 'package:control_cash/screens/reset_screen.dart';
 import 'package:control_cash/screens/sign_in_screen.dart';
 import 'package:control_cash/screens/sign_up_screen.dart';
-import 'package:control_cash/screens/statistic_screen.dart';
+import 'package:control_cash/screens/stats_screen.dart';
 import 'package:control_cash/screens/transactions_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/transactions': (_) => TransactionsScreen(),
-        '/statistic': (_) => const StatisticScreen(),
+        '/stats': (_) => StatsScreen(),
         '/signin': (_) => const SignInScreen(),
         '/signup': (_) => const SignUpScreen(),
         '/reset-password': (_) => const ResetPasswordScreen(),

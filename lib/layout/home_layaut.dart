@@ -2,7 +2,7 @@ import 'package:control_cash/layout/header.dart';
 import 'package:control_cash/screens/stats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:control_cash/screens/transactions_screen.dart';
-import 'package:control_cash/screens/add_transaction_screen.dart';
+import 'package:control_cash/screens/add_or_edit_transaction_screen.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -16,14 +16,8 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   final List<Widget> screens = [
     TransactionsScreen(),
-    AddTransactionScreen(),
+    AddOrEditTransactionScreen(),
     StatsScreen(),
-  ];
-
-  final List<String> titles = [
-    "Transactions",
-    "Add Transaction",
-    "Statistics",
   ];
 
   @override

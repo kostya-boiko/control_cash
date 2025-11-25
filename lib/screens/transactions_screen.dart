@@ -1,260 +1,70 @@
-import 'package:control_cash/data/transactions.dart';
-import 'package:control_cash/utils/date_picker.dart';
+import 'package:control_cash/controllers/transactions_controller.dart';
+import 'package:control_cash/widgets/period_selector_button.dart';
+import 'package:control_cash/widgets/sort_button.dart';
+import 'package:control_cash/widgets/transaction_group.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TransactionsScreen extends StatefulWidget {
+  const TransactionsScreen({super.key});
+
   @override
   State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
-  List<Transaction> allTransactions = [];
-  DateTimeRange? selectedRange;
-
-  final int pageSize = 20;
-  int currentLoaded = 20;
-
-  String sortMode = "date_desc";
-
-  @override
-  void initState() {
-    super.initState();
-
-    allTransactions = transactions;
-  }
-
-  // ░░░░░░░░░░░░░░░░░░░░░  FILTER + SORT + PAGINATION  ░░░░░░░░░░░░░░░░░░░░░
-  List<Transaction> get filteredTransactions {
-    List<Transaction> base = selectedRange == null
-        ? allTransactions
-        : allTransactions.where((t) {
-            return t.date.isAfter(
-                  selectedRange!.start.subtract(const Duration(days: 1)),
-                ) &&
-                t.date.isBefore(
-                  selectedRange!.end.add(const Duration(days: 1)),
-                );
-          }).toList();
-
-    // SORT
-    base.sort((a, b) {
-      switch (sortMode) {
-        case "amount_asc":
-          return a.amount.compareTo(b.amount);
-        case "amount_desc":
-          return b.amount.compareTo(a.amount);
-        case "date_asc":
-          return a.date.compareTo(b.date);
-        case "date_desc":
-        default:
-          return b.date.compareTo(a.date);
-      }
-    });
-
-    return base.take(currentLoaded).toList();
-  }
-
-  // GROUP BY DATE
-  Map<String, List<Transaction>> groupByDate(List<Transaction> list) {
-    Map<String, List<Transaction>> map = {};
-    for (var t in list) {
-      String key = DateFormat('yyyy-MM-dd').format(t.date);
-      map.putIfAbsent(key, () => []);
-      map[key]!.add(t);
-    }
-    return map;
-  }
-
-  Future<void> loadMore() async {
-    setState(() {
-      currentLoaded += pageSize;
-    });
-  }
-
-  void selectPeriod(String period) {
-    final now = DateTime.now();
-
-    switch (period) {
-      case "all":
-        setState(() {
-          selectedRange = null;
-          currentLoaded = pageSize;
-        });
-        break;
-
-      case "today":
-        setState(() {
-          selectedRange = DateTimeRange(
-            start: DateTime(now.year, now.month, now.day),
-            end: DateTime(now.year, now.month, now.day),
-          );
-          currentLoaded = pageSize;
-        });
-        break;
-
-      case "week":
-        setState(() {
-          selectedRange = DateTimeRange(
-            start: now.subtract(const Duration(days: 7)),
-            end: now,
-          );
-          currentLoaded = pageSize;
-        });
-        break;
-
-      case "month":
-        setState(() {
-          selectedRange = DateTimeRange(
-            start: DateTime(now.year, now.month, 1),
-            end: now,
-          );
-          currentLoaded = pageSize;
-        });
-        break;
-
-      case "custom":
-        pickCustomRange(context, (result) {
-          setState(() {
-            selectedRange = result;
-            currentLoaded = pageSize;
-          });
-        });
-        break;
-    }
-  }
-
-  String getPeriodLabel() {
-    if (selectedRange == null) return "All time";
-
-    final formatter = DateFormat('dd.MM.yyyy');
-    return "${formatter.format(selectedRange!.start)} — ${formatter.format(selectedRange!.end)}";
-  }
-
-  // ░░░░░░░░░░░░░░░░░░░░░  BUILD  ░░░░░░░░░░░░░░░░░░░░░
+  final controller = TransactionsController();
 
   @override
   Widget build(BuildContext context) {
-    final grouped = groupByDate(filteredTransactions);
+    final grouped = controller.groupByDate(controller.filteredTransactions);
 
     return Column(
       children: [
-        // ░░░░░░░░░░░░ PERIOD BLOCK  ░░░░░░░░░░░░
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Expanded(
                 child: Text(
-                  getPeriodLabel(),
+                  controller.periodLabel,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
 
-              // Calendar dropdown button
-              PopupMenuButton<String>(
-                icon: Icon(Icons.calendar_month),
-                onSelected: selectPeriod,
-                itemBuilder: (_) => [
-                  PopupMenuItem(value: "all", child: Text("All time")),
-                  PopupMenuItem(value: "today", child: Text("Today")),
-                  PopupMenuItem(value: "week", child: Text("Last 7 days")),
-                  PopupMenuItem(value: "month", child: Text("This month")),
-                  PopupMenuItem(value: "custom", child: Text("Custom range")),
-                ],
+              PeriodSelectorButton(
+                onSelect: (period) async {
+                  await controller.selectPeriod(period, context);
+                  setState(() {});
+                },
               ),
 
-              // Sort button
-              PopupMenuButton<String>(
-                icon: Icon(Icons.sort),
-                onSelected: (value) {
-                  setState(() => sortMode = value);
+              SortButton(
+                onChanged: (mode) {
+                  setState(() => controller.sortMode = mode);
                 },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: "date_desc",
-                    child: Text("Newest first"),
-                  ),
-                  PopupMenuItem(value: "date_asc", child: Text("Oldest first")),
-                  PopupMenuItem(value: "amount_desc", child: Text("Amount ↓")),
-                  PopupMenuItem(value: "amount_asc", child: Text("Amount ↑")),
-                ],
               ),
             ],
           ),
         ),
 
-        // ░░░░░░░░░░░░ LIST  ░░░░░░░░░░░░
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: (scroll) {
-              if (scroll.metrics.pixels >=
-                  scroll.metrics.maxScrollExtent - 200) {
-                loadMore();
+              if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
+                setState(() => controller.loadMore());
               }
               return false;
             },
             child: ListView(
               children: grouped.entries.map((group) {
-                DateTime d = DateTime.parse(group.key);
-                String title;
-
-                DateTime now = DateTime.now();
-                DateTime yesterday = now.subtract(Duration(days: 1));
-
-                if (DateFormat('yyyy-MM-dd').format(d) ==
-                    DateFormat('yyyy-MM-dd').format(now)) {
-                  title = "Today";
-                } else if (DateFormat('yyyy-MM-dd').format(d) ==
-                    DateFormat('yyyy-MM-dd').format(yesterday)) {
-                  title = "Yesterday";
-                } else {
-                  title = DateFormat('dd MMM yyyy').format(d);
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ),
-
-                    ...group.value.map((t) {
-                      return ListTile(
-                        leading: Icon(
-                          t.amount > 0
-                              ? Icons.arrow_upward
-                              : Icons.arrow_downward,
-                          color: t.amount > 0 ? Colors.green : Colors.red,
-                        ),
-                        title: Text(t.title),
-                        subtitle: Text(DateFormat('HH:mm').format(t.date)),
-                        trailing: Text(
-                          "${t.amount > 0 ? "+" : "-"}${t.amount} \$",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: t.amount > 0 ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ],
+                return TransactionGroup(
+                  date: DateTime.parse(group.key),
+                  transactions: group.value,
                 );
               }).toList(),
             ),
           ),
-        ),
+        )
       ],
     );
   }

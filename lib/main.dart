@@ -1,4 +1,4 @@
-import 'package:control_cash/screens/home_layaut.dart';
+import 'package:control_cash/layout/home_layaut.dart';
 import 'package:control_cash/screens/reset_screen.dart';
 import 'package:control_cash/screens/sign_in_screen.dart';
 import 'package:control_cash/screens/sign_up_screen.dart';

@@ -16,40 +16,30 @@ class StandardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        if (onClick != null) {
-          onClick!();
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Message'),
-              content: Text('$textInfo is not working right now'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: FilledButton(
+        onPressed: onClick,
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          side: const BorderSide(width: 1, color: Colors.grey),
+          backgroundColor: isAccent
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
+        ),
+        child: isLoading
+            ? CircularProgressIndicator(color: Colors.white, strokeWidth: 4)
+            : Text(
+                textInfo,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: isAccent
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
                 ),
-              ],
-            ),
-          );
-        }
-      },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        side: const BorderSide(width: 1, color: Colors.grey),
-        backgroundColor: isAccent
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
+              ),
       ),
-      child: isLoading ? CircularProgressIndicator(
-        color: Colors.white,
-        strokeWidth: 4,
-      ) : Text(textInfo, style: TextStyle(color: isAccent ? Colors.white : Theme.of(context).colorScheme.primary)),
-
     );
   }
 }
-

@@ -1,6 +1,6 @@
 class Transaction {
   final String title;
-  final double amount; // негатив = витрата, позитив = дохід
+  final double amount;
   final DateTime date;
   final String category;
   final String comment;

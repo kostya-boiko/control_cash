@@ -8,12 +8,18 @@ class TransactionGroup extends StatelessWidget {
   final DateTime date;
   final List<Transaction> transactions;
 
-  const TransactionGroup({super.key, required this.date, required this.transactions});
+  const TransactionGroup({
+    super.key,
+    required this.date,
+    required this.transactions,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     DateTime now = DateTime.now();
-    DateTime yesterday = now.subtract(Duration(days: 1));
+    DateTime yesterday = now.subtract(const Duration(days: 1));
 
     String title;
     final f = DateFormat('yyyy-MM-dd');
@@ -36,7 +42,7 @@ class TransactionGroup extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+              color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
             ),
           ),
         ),

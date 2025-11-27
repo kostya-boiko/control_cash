@@ -20,6 +20,8 @@ class PeriodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -35,14 +37,18 @@ class PeriodSelector extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               decoration: BoxDecoration(
-                color: active ? Colors.blue : Colors.grey.shade300,
+                color: active
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 p,
                 style: TextStyle(
-                  color: active ? Colors.white : Colors.black87,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                  color: active
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

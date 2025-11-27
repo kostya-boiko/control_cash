@@ -1,8 +1,8 @@
-import 'package:control_cash/layout/header.dart';
-import 'package:control_cash/screens/stats_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:control_cash/layout/header.dart';
 import 'package:control_cash/screens/transactions_screen.dart';
 import 'package:control_cash/screens/add_or_edit_transaction_screen.dart';
+import 'package:control_cash/screens/stats_screen.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -16,28 +16,43 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   final List<Widget> screens = [
     TransactionsScreen(),
-    AddOrEditTransactionScreen(),
     StatsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final Color selectedColor = theme.colorScheme.secondary;
+    final Color unselectedColor = theme.brightness == Brightness.light
+        ? Colors.grey.shade600
+        : Colors.grey.shade400;
+
     return Scaffold(
       appBar: Header(),
       body: screens[currentIndex],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AddOrEditTransactionScreen(),
+            ),
+          );
+        },
+        backgroundColor: theme.colorScheme.primary,
+        child: const Icon(Icons.add),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        selectedItemColor: Colors.blue.shade700,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: selectedColor,
+        unselectedItemColor: unselectedColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         onTap: (i) => setState(() => currentIndex = i),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt_rounded),
             label: "Transactions",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: "Add",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_rounded),

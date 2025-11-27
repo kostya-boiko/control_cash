@@ -16,6 +16,8 @@ class StandardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       width: double.infinity,
       height: 54,
@@ -23,21 +25,29 @@ class StandardButton extends StatelessWidget {
         onPressed: onClick,
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          side: const BorderSide(width: 1, color: Colors.grey),
+          side: BorderSide(
+            width: 1,
+            color: isAccent
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface.withOpacity(0.5),
+          ),
           backgroundColor: isAccent
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surface,
+          foregroundColor: isAccent
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.onSurface,
         ),
         child: isLoading
-            ? CircularProgressIndicator(color: Colors.white, strokeWidth: 4)
+            ? CircularProgressIndicator(
+                color: isAccent
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.primary,
+                strokeWidth: 4,
+              )
             : Text(
                 textInfo,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: isAccent
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
       ),
     );

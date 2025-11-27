@@ -20,18 +20,19 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
 
   late DateTime selectedDateTime;
   late bool isEdit;
+  String transactionType = "Income";
 
   @override
   void initState() {
     super.initState();
-
     isEdit = widget.transaction != null;
 
     if (isEdit) {
       titleController.text = widget.transaction!["title"];
-      amountController.text = widget.transaction!["amount"].toString();
+      amountController.text = widget.transaction!["amount"].abs().toString();
       commentController.text = widget.transaction!["comment"] ?? "";
       selectedDateTime = widget.transaction!["dateTime"];
+      transactionType = widget.transaction!["amount"] >= 0 ? "Income" : "Expense";
     } else {
       selectedDateTime = DateTime.now();
     }
@@ -65,7 +66,7 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
 
   void saveOrUpdate() {
     final title = titleController.text.trim();
-    final amount = double.tryParse(amountController.text.trim()) ?? 0;
+    double amount = double.tryParse(amountController.text.trim()) ?? 0;
     final comment = commentController.text.trim();
 
     if (title.isEmpty || amount <= 0) {
@@ -73,6 +74,12 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
         const SnackBar(content: Text("Please enter valid title and amount")),
       );
       return;
+    }
+
+    if (transactionType == "Expense") {
+      amount = -amount.abs();
+    } else {
+      amount = amount.abs();
     }
 
     final result = {
@@ -85,10 +92,44 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
     Navigator.pop(context, result);
   }
 
+  Widget buildTypeSelector(String type, Color color) {
+    final theme = Theme.of(context);
+    bool isSelected = transactionType == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            transactionType = type;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+            border: Border.all(color: color),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              type,
+              style: TextStyle(
+                color: isSelected ? color : theme.textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
         title: Text(isEdit ? "Edit Transaction" : "Add Transaction"),
         centerTitle: true,
       ),
@@ -101,27 +142,31 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
               labelText: "Title",
             ),
             const SizedBox(height: 14),
-
             StandardInput(
               controller: amountController,
               labelText: "Amount",
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 14),
-
             StandardInput(
               controller: commentController,
               labelText: "Comment",
               maxLines: 3,
             ),
             const SizedBox(height: 20),
-
+            Row(
+              children: [
+                buildTypeSelector("Income", theme.colorScheme.secondary),
+                const SizedBox(width: 10),
+                buildTypeSelector("Expense", theme.colorScheme.error),
+              ],
+            ),
+            const SizedBox(height: 14),
             DateTimePickerField(
               value: selectedDateTime,
               onClick: pickDateTime,
             ),
             const SizedBox(height: 30),
-
             StandardButton(
               textInfo: 'Save Transaction',
               onClick: saveOrUpdate,

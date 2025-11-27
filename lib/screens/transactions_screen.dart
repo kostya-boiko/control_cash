@@ -16,6 +16,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final grouped = controller.groupByDate(controller.filteredTransactions);
 
     return Column(
@@ -27,17 +28,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               Expanded(
                 child: Text(
                   controller.periodLabel,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
                 ),
               ),
-
               PeriodSelectorButton(
                 onSelect: (period) async {
                   await controller.selectPeriod(period, context);
                   setState(() {});
                 },
               ),
-
               SortButton(
                 onChanged: (mode) {
                   setState(() => controller.sortMode = mode);
@@ -46,11 +49,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ],
           ),
         ),
-
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: (scroll) {
-              if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
+              if (scroll.metrics.pixels >=
+                  scroll.metrics.maxScrollExtent - 200) {
                 setState(() => controller.loadMore());
               }
               return false;
@@ -64,7 +67,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               }).toList(),
             ),
           ),
-        )
+        ),
       ],
     );
   }

@@ -21,6 +21,20 @@ class AuthService {
     return _auth.signOut();
   }
 
+  Future<void> removeUser() {
+    return _auth.currentUser!.delete();
+  }
+
+  Future<void> reAuth(String email, String password) {
+    final user = _auth.currentUser;
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+
+    return user!.reauthenticateWithCredential(credential);
+  }
+
   // Reset password
   Future<void> resetPassword(String email) {
     return _auth.sendPasswordResetEmail(email: email);

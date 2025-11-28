@@ -1,6 +1,7 @@
 import 'package:control_cash/data/transactions.dart';
+import 'package:control_cash/services/transactions_service.dart';
 
-Map<DateTime, double> sumByHour(List<Transaction> list) {
+Map<DateTime, double> sumByHour(List<TransactionModel> list) {
   final Map<DateTime, double> map = {};
 
   for (var t in list) {

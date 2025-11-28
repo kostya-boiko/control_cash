@@ -1,12 +1,11 @@
+import 'package:control_cash/services/transactions_service.dart';
 import 'package:control_cash/widgets/transaction_title.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../data/transactions.dart';
-
 class TransactionGroup extends StatelessWidget {
   final DateTime date;
-  final List<Transaction> transactions;
+  final List<TransactionModel> transactions;
 
   const TransactionGroup({
     super.key,

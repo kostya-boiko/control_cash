@@ -1,10 +1,11 @@
+import 'package:control_cash/services/transactions_service.dart';
 import 'package:control_cash/widgets/date_time_picker_field.dart';
 import 'package:control_cash/widgets/standard_button.dart';
 import 'package:control_cash/widgets/standard_input.dart';
 import 'package:flutter/material.dart';
 
 class AddOrEditTransactionScreen extends StatefulWidget {
-  final Map<String, dynamic>? transaction;
+  final TransactionModel? transaction;
 
   const AddOrEditTransactionScreen({super.key, this.transaction});
 
@@ -13,7 +14,8 @@ class AddOrEditTransactionScreen extends StatefulWidget {
       _AddOrEditTransactionScreenState();
 }
 
-class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen> {
+class _AddOrEditTransactionScreenState
+    extends State<AddOrEditTransactionScreen> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
   final commentController = TextEditingController();
@@ -22,17 +24,19 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
   late bool isEdit;
   String transactionType = "Income";
 
+  final _service = TransactionService();
+
   @override
   void initState() {
     super.initState();
     isEdit = widget.transaction != null;
 
     if (isEdit) {
-      titleController.text = widget.transaction!["title"];
-      amountController.text = widget.transaction!["amount"].abs().toString();
-      commentController.text = widget.transaction!["comment"] ?? "";
-      selectedDateTime = widget.transaction!["dateTime"];
-      transactionType = widget.transaction!["amount"] >= 0 ? "Income" : "Expense";
+      titleController.text = widget.transaction!.title;
+      amountController.text = widget.transaction!.amount.abs().toString();
+      commentController.text = widget.transaction!.comment;
+      selectedDateTime = widget.transaction!.date;
+      transactionType = widget.transaction!.amount >= 0 ? "Income" : "Expense";
     } else {
       selectedDateTime = DateTime.now();
     }
@@ -64,7 +68,7 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
     });
   }
 
-  void saveOrUpdate() {
+  Future<void> saveOrUpdate() async {
     final title = titleController.text.trim();
     double amount = double.tryParse(amountController.text.trim()) ?? 0;
     final comment = commentController.text.trim();
@@ -82,14 +86,41 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
       amount = amount.abs();
     }
 
-    final result = {
-      "title": title,
-      "amount": amount,
-      "comment": comment,
-      "dateTime": selectedDateTime,
-    };
+    final transaction = TransactionModel(
+      id: isEdit ? widget.transaction!.id : "",
+      title: title,
+      amount: amount,
+      comment: comment,
+      date: selectedDateTime,
+    );
 
-    Navigator.pop(context, result);
+    try {
+      if (isEdit) {
+        await _service.updateTransaction(transaction);
+      } else {
+        await _service.addTransaction(transaction);
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error saving transaction: $e")));
+    }
+  }
+
+  Future<void> deleteTransaction() async {
+    try {
+      if (isEdit) {
+        await _service.deleteTransaction(widget.transaction!.id);
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error saving transaction: $e")));
+    }
   }
 
   Widget buildTypeSelector(String type, Color color) {
@@ -137,10 +168,7 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            StandardInput(
-              controller: titleController,
-              labelText: "Title",
-            ),
+            StandardInput(controller: titleController, labelText: "Title"),
             const SizedBox(height: 14),
             StandardInput(
               controller: amountController,
@@ -162,16 +190,20 @@ class _AddOrEditTransactionScreenState extends State<AddOrEditTransactionScreen>
               ],
             ),
             const SizedBox(height: 14),
-            DateTimePickerField(
-              value: selectedDateTime,
-              onClick: pickDateTime,
-            ),
+            DateTimePickerField(value: selectedDateTime, onClick: pickDateTime),
             const SizedBox(height: 30),
             StandardButton(
               textInfo: 'Save Transaction',
               onClick: saveOrUpdate,
               isAccent: true,
             ),
+            if (isEdit) const SizedBox(height: 14),
+            if (isEdit)
+              StandardButton(
+                textInfo: 'Delete Transaction',
+                onClick: deleteTransaction,
+                isAccent: true,
+              ),
           ],
         ),
       ),

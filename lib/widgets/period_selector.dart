@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:control_cash/utils/getDateTimeRangeFromName.dart';
 
 class PeriodSelector extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onSelect;
+  final String selectedPeriod;
+  final DateTimeRange selectedRange;
+  final void Function(String period, DateTimeRange range) onSelect; // callback з назвою і датами
 
   const PeriodSelector({
     super.key,
-    required this.selected,
+    required this.selectedPeriod,
+    required this.selectedRange,
     required this.onSelect,
   });
 
@@ -29,11 +32,16 @@ class PeriodSelector extends StatelessWidget {
         itemCount: periods.length,
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, i) {
-          final p = periods[i];
-          final bool active = selected == p;
+          final period = periods[i];
+          final bool active = selectedPeriod == period;
 
           return GestureDetector(
-            onTap: () => onSelect(p),
+            onTap: () async {
+              final range = await getDateTimeRangeFromName(context, period);
+              if (range != null) {
+                onSelect(period, range);
+              }
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               decoration: BoxDecoration(
@@ -43,7 +51,7 @@ class PeriodSelector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                p,
+                period,
                 style: TextStyle(
                   color: active
                       ? theme.colorScheme.onPrimary

@@ -1,10 +1,10 @@
+import 'package:control_cash/services/transactions_service.dart';
 import 'package:flutter/material.dart';
-import '../../../data/transactions.dart';
 import 'package:intl/intl.dart';
 import '../screens/add_or_edit_transaction_screen.dart';
 
 class TransactionTile extends StatelessWidget {
-  final Transaction transaction;
+  final TransactionModel transaction;
 
   const TransactionTile(this.transaction, {super.key});
 
@@ -20,7 +20,7 @@ class TransactionTile extends StatelessWidget {
       title: Text(transaction.title),
       subtitle: Text(DateFormat('HH:mm').format(transaction.date)),
       trailing: Text(
-        "${transaction.amount > 0 ? "+" : "-"}${transaction.amount} \$",
+        "${transaction.amount} \$",
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: transaction.amount > 0 ? Colors.green : Colors.red,
@@ -31,12 +31,7 @@ class TransactionTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => AddOrEditTransactionScreen(
-              transaction: {
-                "title": transaction.title,
-                "amount": transaction.amount,
-                "comment": transaction.comment,
-                "dateTime": transaction.date,
-              },
+              transaction: transaction,
             ),
           ),
         );

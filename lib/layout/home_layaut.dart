@@ -23,11 +23,6 @@ class _HomeLayoutState extends State<HomeLayout> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final Color selectedColor = theme.colorScheme.secondary;
-    final Color unselectedColor = theme.brightness == Brightness.light
-        ? Colors.grey.shade600
-        : Colors.grey.shade400;
-
     return Scaffold(
       appBar: Header(),
       body: screens[currentIndex],
@@ -45,8 +40,10 @@ class _HomeLayoutState extends State<HomeLayout> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        selectedItemColor: selectedColor,
-        unselectedItemColor: unselectedColor,
+        selectedItemColor: theme.colorScheme.secondary,
+        unselectedItemColor: theme.brightness == Brightness.light
+            ? Colors.grey.shade600
+            : Colors.grey.shade400,
         backgroundColor: theme.scaffoldBackgroundColor,
         onTap: (i) => setState(() => currentIndex = i),
         items: const [

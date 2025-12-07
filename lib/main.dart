@@ -3,10 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:control_cash/layout/home_layaut.dart';
 import 'package:control_cash/providers/theme_provider.dart';
 import 'package:control_cash/screens/sign_in_screen.dart';
-import 'package:control_cash/screens/sign_up_screen.dart';
-import 'package:control_cash/screens/reset_screen.dart';
-import 'package:control_cash/screens/transactions_screen.dart';
-import 'package:control_cash/screens/stats_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
@@ -69,13 +65,6 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: themeProvider.themeMode,
-      routes: {
-        '/transactions': (_) => TransactionsScreen(),
-        '/stats': (_) => StatsScreen(),
-        '/signin': (_) => const SignInScreen(),
-        '/signup': (_) => const SignUpScreen(),
-        '/reset-password': (_) => const ResetPasswordScreen(),
-      },
       home: const AuthGate(),
     );
   }

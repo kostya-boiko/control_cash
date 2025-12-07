@@ -92,7 +92,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               title: Text("Change Theme", style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
                               onTap: () {
                                 themeProvider.toggleTheme();
-                                Navigator.pop(context);
                               },
                             ),
                             ListTile(

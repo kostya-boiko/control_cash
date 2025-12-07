@@ -1,4 +1,5 @@
-import 'package:control_cash/utils/getDateTimeRangeFromName.dart';
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,11 @@ class FlowChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> spots = [];
-    List<DateTime> dates = transactions.keys.toList();
-
+    bool isOneDay = false;
+    if (period == 'custom' &&
+        periodDateRange.end.difference(periodDateRange.start).inDays == 0) {
+      isOneDay = true;
+    }
     int totalSpots;
     switch (period) {
       case "today":
@@ -28,8 +31,13 @@ class FlowChart extends StatelessWidget {
         totalSpots = 12;
         break;
       default:
+        if (isOneDay) {
+          totalSpots = 24;
+          break;
+        }
         totalSpots =
             periodDateRange.end.difference(periodDateRange.start).inDays + 1;
+        break;
     }
 
     List<int> shownIndexes;
@@ -52,17 +60,25 @@ class FlowChart extends StatelessWidget {
         shownIndexes = [0, 3, 6, 9, 11];
         break;
       default:
-        if (dates.length <= 5) {
-          shownIndexes = List.generate(dates.length, (i) => i);
+        if (isOneDay) {
+          shownIndexes = [0, 6, 12, 18, 23];
+          break;
         }
-        double step = (dates.length - 1) / 4;
-        shownIndexes = List.generate(5, (i) => (i * step).round());
+        final totalDays =
+            periodDateRange.end.difference(periodDateRange.start).inDays + 1;
+
+        if (totalDays <= 5) {
+          shownIndexes = List.generate(totalDays, (i) => i);
+        } else {
+          final step = (totalDays - 1) / 4;
+          shownIndexes = List.generate(5, (i) => (i * step).round());
+        }
     }
 
     List<double> spotsValues = List.filled(totalSpots, 0);
     for (var entry in transactions.entries) {
       int index;
-      if (period == 'today') {
+      if (period == 'today' || isOneDay) {
         index = entry.key.hour;
       } else if (period == 'year') {
         index = entry.key.month - 1;
@@ -74,7 +90,7 @@ class FlowChart extends StatelessWidget {
 
     /// дата зверху справа
     String getShownDate() {
-      if (period == 'today') {
+      if (period == 'today' || isOneDay) {
         return "${periodDateRange.start.year}.${periodDateRange.start.month}.${periodDateRange.start.day}";
       } else {
         return "${periodDateRange.start.year}.${periodDateRange.start.month}.${periodDateRange.start.day} - ${periodDateRange.end.year}.${periodDateRange.end.month}.${periodDateRange.end.day}";
@@ -82,19 +98,38 @@ class FlowChart extends StatelessWidget {
     }
 
     ///макс по сумам
+
     double getDynamicMaxY(List<double> values) {
       if (values.isEmpty) return 100;
-      final maxValue = values.reduce((a, b) => a > b ? a : b);
-      double padded = maxValue + (maxValue * 0.1);
-      if (padded - maxValue < 20) padded = maxValue + 20;
-      return (padded / 10).ceil() * 10;
+
+      double maxValue = values.reduce((a, b) => a > b ? a : b);
+
+      if (maxValue == 0) return 10;
+
+      // визначаємо порядок числа
+      final magnitude = pow(10, maxValue.toStringAsFixed(0).length - 1);
+
+      // можливі множники: 1, 2, 5
+      final steps = [1, 2, 5]
+          .map((m) => m * magnitude)
+          .toList();
+
+      // вибираємо найближчий крок
+      double chosenStep = steps.firstWhere(
+            (s) => maxValue / s <= 5,
+        orElse: () => 10 * magnitude,
+      ).toDouble();
+
+      // округлюємо maxValue до обраного кроку
+      return (maxValue / chosenStep).ceil() * chosenStep;
     }
+
 
     ///підказки при наведені на точку
     String getTooltipText(int index) {
       final value = spotsValues[index].toStringAsFixed(2);
 
-      if (period == "today") {
+      if (period == "today" || isOneDay) {
         return "${index.toString().padLeft(2, '0')}:00\n₴$value";
       }
 
@@ -121,14 +156,15 @@ class FlowChart extends StatelessWidget {
     }
 
     String getBottomLabel(int index) {
-      if (period == "today") {
+      if (period == "today" || isOneDay) {
         return "$index:00";
       }
 
       if (period == "week") {
-        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "The", "Fri", "Sat"];
+        const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         return daysOfWeek[index];
       }
+
       if (period == "year") {
         const months = [
           "Jan",
@@ -147,7 +183,23 @@ class FlowChart extends StatelessWidget {
         return months[index];
       }
 
-      return "${index + 1}.${periodDateRange.start.month}";
+      if (period == "month") {
+        return "${index + 1}.${periodDateRange.start.month}";
+      }
+
+      final totalDays =
+          periodDateRange.end.difference(periodDateRange.start).inDays + 1;
+
+      if (totalDays <= 5) {
+        final d = periodDateRange.start.add(Duration(days: index));
+        return "${d.day}.${d.month}";
+      }
+
+      final step = (totalDays - 1) / 4;
+
+      final targetDay = periodDateRange.start.add(Duration(days: (index)));
+
+      return "${targetDay.day}.${targetDay.month}";
     }
 
     return Column(

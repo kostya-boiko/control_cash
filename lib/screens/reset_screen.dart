@@ -123,11 +123,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               : Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Google-flutter-logo.svg/1024px-Google-flutter-logo.svg.png',
-                width: 150,
+              Image.asset(
+                'assets/logo.png',
+                width: 300,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
 
               StandardInput(
                 isObscureText: false,

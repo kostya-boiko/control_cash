@@ -92,11 +92,11 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(
-              'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Google-flutter-logo.svg/1024px-Google-flutter-logo.svg.png',
+            Image.asset(
+              'assets/logo.png',
               width: 300,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
 
             if (globalError != null)
               Container(

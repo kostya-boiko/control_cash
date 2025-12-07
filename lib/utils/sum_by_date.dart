@@ -1,4 +1,3 @@
-import 'package:control_cash/data/transactions.dart';
 import 'package:control_cash/services/transactions_service.dart';
 
 Map<DateTime, double> sumByDate(List<TransactionModel> list) {

@@ -1,6 +1,7 @@
 import 'package:control_cash/services/transactions_service.dart';
 import 'package:control_cash/utils/sum_by_date.dart';
 import 'package:control_cash/utils/sum_by_hour.dart';
+import 'package:control_cash/utils/sum_by_month.dart';
 import 'package:control_cash/widgets/flow_chart.dart';
 import 'package:control_cash/widgets/period_selector.dart';
 import 'package:control_cash/widgets/summary_card.dart';
@@ -40,6 +41,8 @@ class _StatsScreenState extends State<StatsScreen> {
       List<TransactionModel> transactions) {
     if (selectedPeriod == 'Today') {
       return (sumByHour(transactions), true);
+    } else if (selectedPeriod == 'Year') {
+      return (sumByMonth(transactions), true);
     } else {
       final byDate = sumByDate(transactions);
       if (byDate.length == 1) {

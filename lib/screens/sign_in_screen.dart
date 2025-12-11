@@ -87,104 +87,101 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/logo.png',
-              width: 300,
-            ),
-            const SizedBox(height: 10),
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                Image.asset('assets/logo.png', width: 300),
+                const SizedBox(height: 10),
 
-            if (globalError != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red),
+                if (globalError != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.red),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            globalError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                StandardInput(
+                  isObscureText: false,
+                  labelText: 'Email',
+                  controller: emailController,
+                  errorText: emailError,
                 ),
-                child: Row(
+                const SizedBox(height: 10),
+
+                StandardInput(
+                  isObscureText: true,
+                  labelText: 'Password',
+                  controller: passwordController,
+                  errorText: passwordError,
+                ),
+                const SizedBox(height: 20),
+
+                Row(
                   children: [
-                    const Icon(Icons.error, color: Colors.red),
-                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        globalError!,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
+                      child: StandardButton(
+                        textInfo: 'Sign in',
+                        isAccent: true,
+                        onClick: signIn,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: StandardButton(
+                        textInfo: 'Sign up',
+                        onClick: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-
-            StandardInput(
-              isObscureText: false,
-              labelText: 'Email',
-              controller: emailController,
-              errorText: emailError,
-            ),
-            const SizedBox(height: 10),
-
-            StandardInput(
-              isObscureText: true,
-              labelText: 'Password',
-              controller: passwordController,
-              errorText: passwordError,
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Expanded(
-                  child: StandardButton(
-                    textInfo: 'Sign in',
-                    isAccent: true,
-                    onClick: signIn,
-                    isLoading: isLoading,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            Row(
-              children: [
-                Expanded(
-                  child: StandardButton(
-                    textInfo: 'Sign up',
-                    onClick: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpScreen(),
-                      ),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ResetPasswordScreen(),
                     ),
                   ),
+                  child: const Text(
+                    'Forget password?',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),
-
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ResetPasswordScreen(),
-                ),
-              ),
-              child: const Text(
-                'Forget password?',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

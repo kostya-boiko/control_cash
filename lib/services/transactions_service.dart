@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:control_cash/services/auth_service.dart';
+
+final authService = AuthService();
 
 class TransactionModel {
   final String id;
@@ -37,20 +40,26 @@ class TransactionModel {
 }
 
 class TransactionService {
-  final CollectionReference<Map<String, dynamic>> _collection =
-  FirebaseFirestore.instance.collection("transactions");
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  CollectionReference<Map<String, dynamic>> _userTransactions() {
+    return _firestore
+        .collection("users")
+        .doc(authService.currentUser?.uid)
+        .collection("transactions");
+  }
 
   Future<void> addTransaction(TransactionModel transaction) async {
-    final docRef = _collection.doc();
+    final docRef = _userTransactions().doc();
     await docRef.set(transaction.toMap(docRef.id));
   }
 
   Future<void> updateTransaction(TransactionModel t) async {
-    await _collection.doc(t.id).update(t.toMap(null));
+    await _userTransactions().doc(t.id).update(t.toMap(null));
   }
 
   Future<void> deleteTransaction(String id) async {
-    await _collection.doc(id).delete();
+    await _userTransactions().doc(id).delete();
   }
 
   Stream<List<TransactionModel>> listenTransactions({
@@ -59,7 +68,7 @@ class TransactionService {
     String orderBy = "date",
     bool descending = true,
   }) {
-    Query<Map<String, dynamic>> query = _collection;
+    Query<Map<String, dynamic>> query = _userTransactions();
 
     if (start != null && end != null) {
       final startDay = DateTime(start.year, start.month, start.day, 0, 0, 0);
@@ -72,7 +81,27 @@ class TransactionService {
 
     query = query.orderBy(orderBy, descending: descending);
 
-    return query.snapshots().map((snap) =>
-        snap.docs.map((doc) => TransactionModel.fromDoc(doc.data())).toList());
+    return query.snapshots().map(
+      (snap) =>
+          snap.docs.map((doc) => TransactionModel.fromDoc(doc.data())).toList(),
+    );
+  }
+
+  double getIncome(transactions) {
+    return transactions.fold(
+      0.0,
+      (sum, t) => t.amount > 0 ? sum + t.amount : sum,
+    );
+  }
+
+  double getExpense(List<TransactionModel> transactions) {
+    return transactions.fold(
+      0.0,
+      (sum, t) => t.amount < 0 ? sum + t.amount : sum,
+    );
+  }
+
+  List<TransactionModel> getExpenseTransactions(List<TransactionModel> transactions) {
+    return transactions.where((t) => t.amount <= 0).toList();
   }
 }

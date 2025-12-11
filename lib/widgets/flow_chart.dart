@@ -1,10 +1,11 @@
 import 'dart:math';
 
+import 'package:control_cash/services/transactions_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class FlowChart extends StatelessWidget {
-  final Map<DateTime, double> transactions;
+  final List<TransactionModel> transactions;
   final String period;
   final DateTimeRange periodDateRange;
 
@@ -76,16 +77,16 @@ class FlowChart extends StatelessWidget {
     }
 
     List<double> spotsValues = List.filled(totalSpots, 0);
-    for (var entry in transactions.entries) {
+    for (var entry in transactions) {
       int index;
       if (period == 'today' || isOneDay) {
-        index = entry.key.hour;
+        index = entry.date.hour;
       } else if (period == 'year') {
-        index = entry.key.month - 1;
+        index = entry.date.month - 1;
       } else {
-        index = entry.key.difference(periodDateRange.start).inDays;
+        index = entry.date.difference(periodDateRange.start).inDays;
       }
-      spotsValues[index] += entry.value.abs();
+      spotsValues[index] += entry.amount.abs();
     }
 
     /// дата зверху справа
@@ -281,7 +282,7 @@ class FlowChart extends StatelessWidget {
               borderData: FlBorderData(show: false),
               minX: 0,
               minY: 0,
-              maxY: getDynamicMaxY(transactions.values.toList()),
+              maxY: getDynamicMaxY(spotsValues),
               lineBarsData: [
                 LineChartBarData(
                   spots: List.generate(

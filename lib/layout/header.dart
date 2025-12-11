@@ -19,12 +19,19 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = Theme.of(context);
 
-    Future<void> logOut() async {
+    Future<void> logOut(BuildContext ctx) async {
+      Navigator.of(ctx).pop();
       await authService.signOut();
-      Navigator.pushAndRemoveUntil(
-        context,
+      Navigator.of(ctx, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MyApp()),
             (_) => false,
+      );
+    }
+
+    void deleteAccount(BuildContext ctx) {
+      Navigator.of(ctx).pop();
+      Navigator.of(ctx, rootNavigator: true).push(
+        MaterialPageRoute(builder: (_) => const DeleteAccountScreen()),
       );
     }
 
@@ -72,7 +79,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (_) => AlertDialog(
+                      builder: (dialogContext) => AlertDialog(
                         backgroundColor: theme.scaffoldBackgroundColor,
                         title: Text("Profile", style: TextStyle(color: theme.colorScheme.primary)),
                         content: Column(
@@ -97,25 +104,18 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                             ListTile(
                               leading: Icon(Icons.logout, color: theme.iconTheme.color),
                               title: Text("Logout", style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
-                              onTap: () => logOut(),
+                              onTap: () => logOut(dialogContext),
                             ),
                             ListTile(
                               leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
                               title: Text("Delete Account", style: TextStyle(color: theme.colorScheme.error)),
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const DeleteAccountScreen(),
-                                  ),
-                                );
-                              },
+                              onTap: () => deleteAccount(dialogContext),
                             ),
                           ],
                         ),
                         actions: [
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
                             child: Text("Close", style: TextStyle(color: theme.colorScheme.primary)),
                           ),
                         ],

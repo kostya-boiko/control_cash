@@ -94,88 +94,92 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/logo.png',
-              width: 300,
-            ),
-            const SizedBox(height: 10),
-
-            if (globalError != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red),
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  width: 300,
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error, color: Colors.red),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        globalError!,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
+                const SizedBox(height: 10),
+
+                if (globalError != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.red),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            globalError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+
+                StandardInput(
+                  isObscureText: false,
+                  labelText: 'Email',
+                  controller: emailController,
+                  errorText: emailError,
+                ),
+                const SizedBox(height: 10),
+
+                StandardInput(
+                  isObscureText: true,
+                  labelText: 'Password',
+                  controller: passwordController,
+                  errorText: passwordError,
+                ),
+                const SizedBox(height: 10),
+
+                StandardInput(
+                  isObscureText: true,
+                  labelText: 'Confirm password',
+                  controller: confirmController,
+                  errorText: confirmError,
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: StandardButton(
+                        textInfo: 'Sign Up',
+                        isAccent: true,
+                        onClick: signUp,
+                        isLoading: isLoading,
                       ),
                     ),
                   ],
                 ),
-              ),
 
-            StandardInput(
-              isObscureText: false,
-              labelText: 'Email',
-              controller: emailController,
-              errorText: emailError,
-            ),
-            const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-            StandardInput(
-              isObscureText: true,
-              labelText: 'Password',
-              controller: passwordController,
-              errorText: passwordError,
-            ),
-            const SizedBox(height: 10),
-
-            StandardInput(
-              isObscureText: true,
-              labelText: 'Confirm password',
-              controller: confirmController,
-              errorText: confirmError,
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Expanded(
-                  child: StandardButton(
-                    textInfo: 'Sign Up',
-                    isAccent: true,
-                    onClick: signUp,
-                    isLoading: isLoading,
-                  ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Sign In', style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),
-
-            const SizedBox(height: 10),
-
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Sign In', style: TextStyle(fontSize: 16)),
-            ),
-          ],
+          ),
         ),
       ),
     );

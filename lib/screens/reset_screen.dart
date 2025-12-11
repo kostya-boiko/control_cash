@@ -61,109 +61,106 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Center(
-          child: isEmailSend
-              ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.check_circle,
-                        size: 60, color: Colors.green),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Email has been sent!',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: isEmailSend
+                ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.check_circle,
+                          size: 60, color: Colors.green),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Email has been sent!',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Follow the instructions in the email to reset your password.',
-                      textAlign: TextAlign.center,
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Follow the instructions in the email to reset your password.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StandardButton(
+                        textInfo: 'Sign in',
+                        isAccent: true,
+                        onClick: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignInScreen(),
+                            ),
+                          );
+                        },
+                        isLoading: isLoading,
+                      ),
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 30),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: StandardButton(
-                      textInfo: 'Sign in',
-                      isAccent: true,
-                      onClick: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignInScreen(),
-                          ),
-                        );
-                      },
-                      isLoading: isLoading,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          )
-              : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/logo.png',
-                width: 300,
-              ),
-              const SizedBox(height: 10),
-
-              StandardInput(
-                isObscureText: false,
-                labelText: 'Email',
-                controller: emailController,
-                errorText: emailError,
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: StandardButton(
-                      textInfo: 'Reset password',
-                      isAccent: true,
-                      onClick: resetPassword,
-                      isLoading: isLoading,
-                    ),
-                  ),
-                ],
-              ),
-
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SignInScreen(),
-                  ),
+              ],
+            )
+                : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  width: 300,
                 ),
-                child: const Text('Sign In'),
-              ),
-            ],
+                const SizedBox(height: 10),
+                StandardInput(
+                  isObscureText: false,
+                  labelText: 'Email',
+                  controller: emailController,
+                  errorText: emailError,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StandardButton(
+                        textInfo: 'Reset password',
+                        isAccent: true,
+                        onClick: resetPassword,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                  ],
+                ),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignInScreen(),
+                    ),
+                  ),
+                  child: const Text('Sign In'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 }
